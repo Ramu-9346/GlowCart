@@ -1,0 +1,81 @@
+﻿using GlowCart.Entities.Models;
+using System.Data;
+using Microsoft.Data.SqlClient;
+
+namespace GlowCart.DAL.DAO
+{
+    public class ProductDAO
+    {
+        private readonly string _connectionString;
+
+        public ProductDAO(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
+        // ✅ Get all products
+        public List<Product> GetAllProducts()
+        {
+            List<Product> products = new List<Product>();
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_GetProducts", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    var product = new Product
+                    {
+                        ProductId = Convert.ToInt32(dr["ProductID"]),
+                        ProductName = dr["ProductName"].ToString(),
+                        Description = dr["Description"].ToString(),
+                        Price = Convert.ToDecimal(dr["Price"]),
+                        ImageUrl = dr["ImageUrl"].ToString(),
+                        Brand = dr["Brand"] != DBNull.Value ? dr["Brand"].ToString() : "N/A",
+                        IsAvailable = dr["IsAvailable"] != DBNull.Value && Convert.ToBoolean(dr["IsAvailable"])
+                    };
+                    products.Add(product);
+                }
+            }
+
+            return products;
+        }
+
+
+        // ✅ Get single product details
+        public Product GetProductDetails(int productId)
+        {
+            Product product = null;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_GetProductDetails", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@ProductID", productId);
+
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    product = new Product
+                    {
+                        ProductId = Convert.ToInt32(dr["ProductID"]),
+                        ProductName = dr["ProductName"].ToString(),
+                        Description = dr["Description"].ToString(),
+                        Price = Convert.ToDecimal(dr["Price"]),
+                        ImageUrl = dr["ImageUrl"].ToString(),
+                        Brand = dr["Brand"] != DBNull.Value ? dr["Brand"].ToString() : "N/A",
+                        IsAvailable = dr["IsAvailable"] != DBNull.Value && Convert.ToBoolean(dr["IsAvailable"])
+                    };
+                }
+            }
+
+            return product;
+        }
+    }
+}

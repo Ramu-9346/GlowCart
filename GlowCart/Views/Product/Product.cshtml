@@ -1,0 +1,81 @@
+﻿@model IEnumerable<GlowCart.Entities.Models.Product>
+
+@{
+    ViewBag.Title = "Our Latest Products";
+}
+
+<!-- ✅ Include Bootstrap + Custom CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-warning fw-bold">Our Latest Products</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning text-center shadow">
+            ⚠️ No products available right now. Please check again later!
+        </div>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var product in Model)
+            {
+                <div class="product-card shadow-lg">
+                    <a href="javascript:void(0);" class="product-link" data-id="@product.ProductId">
+                        <img src="@Url.Content("~/images/" + product.ImageUrl)" alt="@product.ProductName" class="img-fluid rounded-top" />
+                    </a>
+                    <div class="product-info">
+                        <h5>@product.ProductName</h5>
+                        <p>@product.Description</p>
+                        <p class="product-price">₹@product.Price</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- 🔹 Product Details Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-warning fw-bold" id="productModalLabel">Product Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="productModalBody">
+                <!-- AJAX-loaded content will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".product-link").click(function () {
+            var productId = $(this).data("id");
+
+            $.ajax({
+                url: '@Url.Action("Details", "Product")',
+                type: "GET",
+                data: { id: productId },
+                success: function (response) {
+                    $("#productModalBody").html(response);
+                    var modal = new bootstrap.Modal(document.getElementById('productModal'));
+                    modal.show();
+                },
+                error: function () {
+                    $("#productModalBody").html("<div class='text-danger text-center p-3'>❌ Failed to load product details.</div>");
+                    var modal = new bootstrap.Modal(document.getElementById('productModal'));
+                    modal.show();
+                }
+            });
+        });
+    });
+</script>
