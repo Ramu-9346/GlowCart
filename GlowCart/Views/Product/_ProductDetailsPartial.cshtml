@@ -1,0 +1,56 @@
+﻿@model GlowCart.Entities.Models.Product
+
+<div class="product-details-container">
+    <!-- Left: Product Image -->
+    <div class="product-details-image text-center">
+        <img src="@Url.Content("~/images/" + Model.ImageUrl)"
+             alt="@Model.ProductName"
+             class="img-fluid rounded shadow-lg border border-secondary"
+             style="max-height: 380px; object-fit: cover;" />
+    </div>
+
+    <!-- Right: Product Information -->
+    <div class="product-details-info p-4">
+        <h2 class="product-title">@Model.ProductName</h2>
+        <p class="product-description">@Model.Description</p>
+
+        <div class="product-meta mt-3">
+            <p>
+                <strong>Brand:</strong>
+                <span>@(!string.IsNullOrEmpty(Model.Brand) ? Model.Brand : "Generic")</span>
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                @if (Model.IsAvailable)
+                {
+                    <span class="badge bg-success">In Stock</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Out of Stock</span>
+                }
+            </p>
+        </div>
+
+        <h4 class="product-price">₹@Model.Price</h4>
+
+        <div class="product-buttons mt-3 d-flex flex-wrap gap-3">
+            @if (Model.IsAvailable)
+            {
+                <button class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm">
+                    🛒 Add to Cart
+                </button>
+                <button class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+                    💳 Buy Now
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-secondary px-4 py-2 fw-bold" disabled>
+                    Out of Stock
+                </button>
+            }
+        </div>
+    </div>
+</div>

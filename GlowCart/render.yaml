@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: GlowCart
+    env: dotnet
+    buildCommand: "dotnet publish -c Release -o out"
+    startCommand: "dotnet out/GlowCart.dll"
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
