@@ -9,7 +9,7 @@ namespace GlowCart.BLL.Services
 
         public ProductService(string connectionString)
         {
-            _productDAO = new ProductDAO(connectionString);
+            _productDAO = new ProductDAO();
         }
 
         public List<Product> GetAllProducts()

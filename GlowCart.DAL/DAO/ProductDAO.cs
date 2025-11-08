@@ -1,6 +1,7 @@
 ﻿using GlowCart.Entities.Models;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration; // ✅ For reading from appsettings.json
 
 namespace GlowCart.DAL.DAO
 {
@@ -8,9 +9,16 @@ namespace GlowCart.DAL.DAO
     {
         private readonly string _connectionString;
 
-        public ProductDAO(string connectionString)
+        // ✅ Constructor automatically reads connection string from appsettings.json
+        public ProductDAO()
         {
-            _connectionString = connectionString;
+            // Build configuration to read from appsettings.json
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            _connectionString = config.GetConnectionString("DefaultConnection");
         }
 
         // ✅ Get all products
@@ -44,7 +52,6 @@ namespace GlowCart.DAL.DAO
 
             return products;
         }
-
 
         // ✅ Get single product details
         public Product GetProductDetails(int productId)
