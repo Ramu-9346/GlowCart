@@ -6,3 +6,6 @@
     startCommand: "dotnet out/GlowCart.dll"
     plan: free
     region: singapore
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
