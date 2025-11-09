@@ -3,6 +3,4 @@
     name: glowcart
     env: docker
     plan: free
-    buildCommand: ""
-    startCommand: "dotnet GlowCart.dll"
     dockerfilePath: ./Dockerfile
