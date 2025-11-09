@@ -1,0 +1,192 @@
+﻿/* ================================
+   GlowCart - Modern Product Grid
+   Author: Ramu Runja
+   ================================ */
+
+/* ---------- Base ---------- */
+body {
+    background-color: #0e0e0e;
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: auto;
+}
+
+/* ---------- Page Title ---------- */
+h2 {
+    text-align: center;
+    color: #ffc107;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+/* ---------- Product Grid ---------- */ 
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    justify-items: center;
+    margin-bottom: 60px;
+}
+
+/* ---------- Product Card ---------- */
+.product-card {
+    background-color: #1a1a1a;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+}
+
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+    }
+
+    /* ---------- Product Image ---------- */
+    .product-card img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-bottom: 1px solid #333;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .product-card img:hover {
+            transform: scale(1.05);
+        }
+
+/* ---------- Product Info ---------- */
+.product-info {
+    padding: 15px 20px;
+}
+
+    .product-info h5 {
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .product-info p {
+        color: #ccc;
+        font-size: 0.9rem;
+    }
+
+/* ---------- Price ---------- */
+.product-price {
+    color: #28a745;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* ---------- Modal ---------- */
+.modal-content {
+    background-color: #1a1a1a;
+    color: #fff;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+    animation: modalZoom 0.3s ease-in-out;
+}
+
+/* ---------- Modal Animations ---------- */
+@keyframes modalZoom {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    transition: all 0.3s ease-in-out;
+}
+
+.modal.fade.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* ---------- Product Details ---------- */
+.product-details-container {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    padding: 30px;
+    justify-content: center;
+}
+
+.product-details-image img {
+    border-radius: 12px;
+    max-width: 420px;
+    object-fit: cover;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.product-details-info {
+    background: #1c1c1c;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+}
+
+.product-title {
+    color: #ffc107;
+    font-weight: 700;
+}
+
+.product-description {
+    color: #ccc;
+}
+
+.product-price {
+    font-size: 1.6rem;
+    color: #28a745;
+    font-weight: 700;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .product-details-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-dialog {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        animation: slideUp 0.4s ease-out forwards;
+        height: 95vh;
+        overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+}
+/*hello world*/
