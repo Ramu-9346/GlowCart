@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "User Authentication";
+    Layout = null;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+
+<div class="cont" id="auth-container">
+    <div class="form sign-in">
+        <h2>Welcome Back</h2>
+
+        <form id="loginForm" class="mt-4">
+            <label>
+                <span>Email</span>
+                <input type="email" id="loginEmail" name="Email" placeholder="Enter your email" required />
+            </label>
+
+            <label>
+                <span>Password</span>
+                <input type="password" id="loginPassword" name="Password" placeholder="Enter your password" required />
+            </label>
+
+            <p class="forgot-pass"><a href="#" id="forgotPasswordLink">Forgot your password?</a></p>
+            <button type="submit" class="submit">Sign In</button>
+        </form>
+
+        <p class="text-center mt-3 text-danger fw-bold" id="loginMessage"></p>
+    </div>
+
+    <div class="sub-cont">
+        <div class="img">
+            <div class="img__text m--up">
+                <h2>New here?</h2>
+                <p>Sign up and start shopping with GlowCart today.</p>
+            </div>
+            <div class="img__text m--in">
+                <h2>One of us?</h2>
+                <p>Already have an account? Just sign in — we’ve missed you!</p>
+            </div>
+            <div class="img__btn" id="switch-btn">
+                <span class="m--up">Sign Up</span>
+                <span class="m--in">Sign In</span>
+            </div>
+        </div>
+
+        <div class="form sign-up scrollable-form">
+            <h2>Create Account</h2>
+
+            <form id="registerForm" class="mt-4">
+                <label>
+                    <span>Full Name</span>
+                    <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" required />
+                </label>
+                <label>
+                    <span>Email</span>
+                    <input type="email" id="Email" name="Email" placeholder="Enter your email" required />
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input type="password" id="Password" name="Password" placeholder="Create a password" required />
+                </label>
+                <label>
+                    <span>Phone</span>
+                    <input type="text" id="Phone" name="Phone" placeholder="Enter phone number" maxlength="10" required />
+                </label>
+                <label>
+                    <span>Address</span>
+                    <textarea id="Address" name="Address" placeholder="Enter your address" required></textarea>
+                </label>
+                <button type="submit" class="submit">Register</button>
+            </form>
+
+            <p class="text-center mt-3 text-success fw-bold" id="registerMessage"></p>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/script.js" asp-append-version="true"></script>
+
+<script>
+    // --- Controller Calls (AJAX) ---
+
+    jQuery(function ($) {
+
+        // ✅ Registration
+        $("#registerForm").submit(function (e) {
+            e.preventDefault();
+            var regData = {
+                FullName: $("#FullName").val(),
+                Email: $("#Email").val(),
+                Password: $("#Password").val(),
+                Phone: $("#Phone").val(),
+                Address: $("#Address").val()
+            };
+
+            $.ajax({
+                url: '/Account/Register',
+                type: 'POST',
+                data: regData,
+                success: function (response) {
+                    if (response.success) {
+                        $("#registerMessage").text("✅ Registration successful! Redirecting to login...");
+                        $("#registerForm")[0].reset();
+                        setTimeout(() => $("#auth-container").removeClass("s--signup"), 1500);
+                    } else if (response.message === "Email is already exist") {
+                        alert("⚠️ Email already exists!");
+                        $("#registerMessage").text("⚠️ Email already exists!");
+                    } else {
+                        $("#registerMessage").text("⚠️ Registration failed.");
+                    }
+                },
+                error: function () {
+                    $("#registerMessage").text("⚠️ Server error. Please try again later.");
+                }
+            });
+        });
+
+        // ✅ Login
+        let attemptCount = 0;
+        let lockUntil = null;
+
+        $("#loginForm").submit(function (e) {
+            e.preventDefault();
+
+            if (lockUntil && new Date() < lockUntil) {
+                alert("🚫 Locked. Try again after 10 minutes.");
+                return;
+            }
+
+            var loginData = {
+                Email: $("#loginEmail").val(),
+                Password: $("#loginPassword").val()
+            };
+
+            $.ajax({
+                url: '/Account/Login',
+                type: 'POST',
+                data: loginData,
+                success: function (response) {
+                    if (response.success) {
+                        $("#loginMessage").text("✅ Login successful! Redirecting...");
+                        setTimeout(() => window.location.href = "/Product/GetProducts", 1500);
+                    } else {
+                        $("#loginEmail, #loginPassword").val("");
+                        attemptCount++;
+                        if (attemptCount >= 3) {
+                            lockUntil = new Date(Date.now() + 10 * 60000);
+                            alert("⚠️ Exceeded limit. Try again after 10 minutes.");
+                        } else {
+                            alert("❌ Invalid credentials. Attempts left: " + (3 - attemptCount));
+                        }
+                    }
+                },
+                error: function () {
+                    $("#loginMessage").text("⚠️ Server error. Try again later.");
+                }
+            });
+        });
+
+        // ✅ Forgot Password
+        $("#forgotPasswordLink").click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/Account/ForgotPassword',
+                type: 'GET',
+                success: function (response) {
+                    $(".sign-in").html(response);
+                },
+                error: function () {
+                    alert("⚠️ Could not load Forgot Password page.");
+                }
+            });
+        });
+    });
+</script>
