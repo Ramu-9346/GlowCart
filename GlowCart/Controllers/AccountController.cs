@@ -41,14 +41,21 @@ namespace GlowCart.Controllers
         // 🔹 Login via AJAX
         // ==============================
         [HttpPost]
+        [HttpPost]
         public JsonResult Login(Login model)
         {
+            // Validate user credentials
             bool isValid = _userService.ValidateLogin(model);
 
             if (isValid)
             {
-                // ✅ Store session for logged-in user
+                // ✅ Get UserId from DB (using a helper in your UserService)
+                int userId = _userService.GetUserIdByEmail(model.Email);
+
+                // ✅ Store user details in session
                 HttpContext.Session.SetString("UserEmail", model.Email);
+                HttpContext.Session.SetInt32("UserId", userId);
+
                 return Json(new { success = true });
             }
             else
@@ -56,6 +63,7 @@ namespace GlowCart.Controllers
                 return Json(new { success = false, message = "Invalid email or password." });
             }
         }
+
 
         // ==============================
         // 🔹 Logout

@@ -30,5 +30,10 @@ namespace GlowCart.BLL.Services
         {
             return _userDAO.ValidateLogin(model);
         }
+        public int GetUserIdByEmail(string email)
+        {
+            return _userDAO.GetUserIdByEmail(email);
+        }
+
     }
 }

@@ -77,5 +77,18 @@ namespace GlowCart.DAL.DAO
                 return false;
             }
         }
+        public int GetUserIdByEmail(string email)
+        {
+            using (SqlConnection con = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("SELECT UserId FROM Users WHERE Email = @Email", con))
+            {
+                cmd.Parameters.AddWithValue("@Email", email);
+                con.Open();
+
+                object result = cmd.ExecuteScalar();
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+        }
+
     }
 }

@@ -33,15 +33,18 @@
             </p>
         </div>
 
-        <h4 class="product-price">₹@Model.Price</h4>
+        <h4 class="product-price mt-3">₹@Model.Price</h4>
 
-        <div class="product-buttons mt-3 d-flex flex-wrap gap-3">
+        <div class="product-buttons mt-4 d-flex flex-wrap gap-3">
             @if (Model.IsAvailable)
             {
-                <button class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm">
+                <button id="btnAddToCart" data-id="@Model.ProductId"
+                        class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm">
                     🛒 Add to Cart
                 </button>
-                <button class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+
+                <button id="btnBuyNow" data-id="@Model.ProductId"
+                        class="btn btn-success fw-bold px-4 py-2 shadow-sm">
                     💳 Buy Now
                 </button>
             }
@@ -52,5 +55,59 @@
                 </button>
             }
         </div>
+
+        <p id="actionMessage" class="mt-3 fw-bold text-info"></p>
     </div>
 </div>
+
+<!-- ✅ jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        // 🛒 Add to Cart
+        $("#btnAddToCart").click(function () {
+            var productId = $(this).data("id");
+
+            $.ajax({
+                url: '/Cart/AddToCart',
+                type: 'POST',
+                data: { productId: productId, quantity: 1 },
+                success: function (response) {
+                    if (response.success) {
+                        $("#actionMessage").text("✅ Item added to cart!");
+                        setTimeout(() => window.location.href = "/Cart/ViewCart", 1000);
+                    } else {
+                        $("#actionMessage").text("⚠️ Failed to add item. Please try again.");
+                    }
+                },
+                error: function () {
+                    $("#actionMessage").text("⚠️ Server error occurred.");
+                }
+            });
+        });
+
+        // 💳 Buy Now
+        $("#btnBuyNow").click(function () {
+            var productId = $(this).data("id");
+
+            $.ajax({
+                url: '/Cart/AddToCart',
+                type: 'POST',
+                data: { productId: productId, quantity: 1 },
+                success: function (response) {
+                    if (response.success) {
+                        $("#actionMessage").text("✅ Redirecting to checkout...");
+                        setTimeout(() => window.location.href = "/Order/Checkout", 1000);
+                    } else {
+                        $("#actionMessage").text("⚠️ Failed to process your request.");
+                    }
+                },
+                error: function () {
+                    $("#actionMessage").text("⚠️ Server error occurred.");
+                }
+            });
+        });
+    });
+</script>
