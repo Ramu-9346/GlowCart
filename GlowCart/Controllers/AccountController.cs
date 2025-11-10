@@ -18,7 +18,7 @@ namespace GlowCart.Controllers
         // ==============================
         public IActionResult Auth()
         {
-            // ✅ If already logged in, redirect to Products page
+            // If already logged in, redirect to Products page
             if (HttpContext.Session.GetString("UserEmail") != null)
             {
                 return RedirectToAction("GetProducts", "Product");
@@ -40,23 +40,28 @@ namespace GlowCart.Controllers
         // ==============================
         // 🔹 Login via AJAX
         // ==============================
-        [HttpPost]
+
         [HttpPost]
         public JsonResult Login(Login model)
         {
-            // Validate user credentials
             bool isValid = _userService.ValidateLogin(model);
 
             if (isValid)
             {
-                // ✅ Get UserId from DB (using a helper in your UserService)
                 int userId = _userService.GetUserIdByEmail(model.Email);
+                string role = _userService.GetUserRoleByEmail(model.Email);
 
-                // ✅ Store user details in session
+                // ✅ Store in Session
                 HttpContext.Session.SetString("UserEmail", model.Email);
                 HttpContext.Session.SetInt32("UserId", userId);
+                HttpContext.Session.SetString("UserRole", role);
 
-                return Json(new { success = true });
+                //  Redirect based on Role
+                string? redirectUrl = role == "Admin"
+                    ? Url.Action("Dashboard", "Admin")
+                    : Url.Action("Index", "Home");
+
+                return Json(new { success = true, redirectUrl });
             }
             else
             {
@@ -65,12 +70,13 @@ namespace GlowCart.Controllers
         }
 
 
+
         // ==============================
         // 🔹 Logout
         // ==============================
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // ✅ Destroy all session data
+            HttpContext.Session.Clear(); //  Destroy all session data
             return RedirectToAction("Auth", "Account");
         }
         [HttpGet]

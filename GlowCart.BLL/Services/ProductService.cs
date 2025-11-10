@@ -17,6 +17,21 @@ namespace GlowCart.BLL.Services
             return _productDAO.GetAllProducts();
         }
 
+        public bool AddProduct(Product product)
+        {
+            return _productDAO.AddProduct(product);
+        }
+
+        public bool UpdateProduct(Product product)
+        {
+            return _productDAO.UpdateProduct(product);
+        }
+
+        public bool DeleteProduct(int id)
+        {
+            return _productDAO.DeleteProduct(id);
+        }
+
         public Product GetProductDetails(int id)
         {
             return _productDAO.GetProductDetails(id);

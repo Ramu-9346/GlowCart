@@ -84,5 +84,60 @@ namespace GlowCart.DAL.DAO
 
             return product;
         }
+        // ✅ Add a new product
+        public bool AddProduct(Product product)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_AddProduct", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@ProductName", product.ProductName);
+                cmd.Parameters.AddWithValue("@Description", product.Description ?? "");
+                cmd.Parameters.AddWithValue("@Price", product.Price);
+                cmd.Parameters.AddWithValue("@ImageUrl", product.ImageUrl ?? "noimage.png");
+                cmd.Parameters.AddWithValue("@Brand", product.Brand ?? "N/A");
+                cmd.Parameters.AddWithValue("@IsAvailable", product.IsAvailable);
+
+                conn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        // ✅ Update an existing product
+        public bool UpdateProduct(Product product)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_UpdateProduct", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@ProductID", product.ProductId);
+                cmd.Parameters.AddWithValue("@ProductName", product.ProductName);
+                cmd.Parameters.AddWithValue("@Description", product.Description ?? "");
+                cmd.Parameters.AddWithValue("@Price", product.Price);
+                cmd.Parameters.AddWithValue("@ImageUrl", product.ImageUrl ?? "noimage.png");
+                cmd.Parameters.AddWithValue("@Brand", product.Brand ?? "N/A");
+                cmd.Parameters.AddWithValue("@IsAvailable", product.IsAvailable);
+
+                conn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        // ✅ Delete a product
+        public bool DeleteProduct(int productId)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_DeleteProduct", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@ProductID", productId);
+
+                conn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
     }
 }

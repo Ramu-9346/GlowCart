@@ -1,8 +1,79 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home - GlowCart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold text-warning">✨ Welcome to GlowCart!</h1>
+        <p class="lead text-muted">Hello, <strong>@ViewBag.UserName</strong> 👋</p>
+        <p>Your one-stop shop for trendy products, best deals, and a seamless shopping experience.</p>
+    </div>
+
+    <!-- 🔹 Quick Access Cards -->
+    <div class="row justify-content-center g-4">
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 hover-card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">🛍️ Our Products</h5>
+                    <p class="card-text">Explore amazing deals across categories.</p>
+                    <a href="/Product/GetProducts" class="btn btn-warning fw-bold">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 hover-card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success">📦 My Orders</h5>
+                    <p class="card-text">View your past purchases and order status.</p>
+                    <a href="/Order/History" class="btn btn-success fw-bold">View Orders</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 hover-card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">👤 My Profile</h5>
+                    <p class="card-text">Update personal info and manage account.</p>
+                    <a href="/Account/Profile" class="btn btn-primary fw-bold">Go to Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 hover-card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-info">ℹ️ About</h5>
+                    <p class="card-text">Know more about GlowCart and our mission.</p>
+                    <a href="/Home/About" class="btn btn-info fw-bold text-white">About Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Featured Carousel -->
+    <div id="offerCarousel" class="carousel slide mt-5" data-bs-ride="carousel">
+        <div class="carousel-inner rounded shadow-lg">
+            <div class="carousel-item active">
+                <img src="~/images/banner1.jpg" class="d-block w-100" alt="Offer 1">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/banner2.jpg" class="d-block w-100" alt="Offer 2">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/banner3.jpg" class="d-block w-100" alt="Offer 3">
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .hover-card:hover {
+        transform: translateY(-5px);
+        transition: 0.3s ease-in-out;
+    }
+</style>

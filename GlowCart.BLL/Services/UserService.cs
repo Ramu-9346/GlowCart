@@ -34,6 +34,10 @@ namespace GlowCart.BLL.Services
         {
             return _userDAO.GetUserIdByEmail(email);
         }
+        public string GetUserRoleByEmail(string email)
+        {
+            return  _userDAO.GetUserRoleByEmail(email);
+        }
 
     }
 }

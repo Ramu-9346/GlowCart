@@ -44,5 +44,15 @@ namespace GlowCart.Controllers
             bool result = _service.ClearCart(userId);
             return Json(new { success = result });
         }
+        [HttpGet]
+        public JsonResult GetCartItems()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+                return Json(new { success = false, message = "Please log in first." });
+
+            var items = _service.GetCartItems(userId.Value);
+            return Json(items);
+        }
     }
 }

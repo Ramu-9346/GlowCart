@@ -89,6 +89,22 @@ namespace GlowCart.DAL.DAO
                 return result != null ? Convert.ToInt32(result) : 0;
             }
         }
+        public string GetUserRoleByEmail(string email)
+        {
+            string role = "User";
+
+            using (SqlConnection con = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("SELECT Role FROM Users WHERE Email = @Email", con);
+                cmd.Parameters.AddWithValue("@Email", email);
+                con.Open();
+                var result = cmd.ExecuteScalar();
+                if (result != null)
+                    role = result.ToString();
+            }
+
+            return role;
+        }
 
     }
 }

@@ -123,43 +123,36 @@
         let attemptCount = 0;
         let lockUntil = null;
 
-        $("#loginForm").submit(function (e) {
-            e.preventDefault();
+           $("#loginForm").submit(function (e) {
+        e.preventDefault();
 
-            if (lockUntil && new Date() < lockUntil) {
-                alert("🚫 Locked. Try again after 10 minutes.");
-                return;
+        var loginData = {
+            Email: $("#loginEmail").val(),
+            Password: $("#loginPassword").val()
+        };
+
+        $.ajax({
+            url: '/Account/Login',
+            type: 'POST',
+            data: loginData,
+               success: function (response) {
+        if (response.success) {
+            $("#loginMessage").text("✅ Login successful! Redirecting...");
+            setTimeout(() => {
+                window.location.href = response.redirectUrl; // 🚀 Auto-redirects based on role
+            }, 1200);
+        } else {
+            $("#loginMessage").text("❌ Invalid email or password!");
+            $("#loginEmail, #loginPassword").val('');
+        }
+    },
+
+            error: function () {
+                $("#loginMessage").text("⚠️ Server error. Please try again later.");
             }
-
-            var loginData = {
-                Email: $("#loginEmail").val(),
-                Password: $("#loginPassword").val()
-            };
-
-            $.ajax({
-                url: '/Account/Login',
-                type: 'POST',
-                data: loginData,
-                success: function (response) {
-                    if (response.success) {
-                        $("#loginMessage").text("✅ Login successful! Redirecting...");
-                        setTimeout(() => window.location.href = "/Product/GetProducts", 1500);
-                    } else {
-                        $("#loginEmail, #loginPassword").val("");
-                        attemptCount++;
-                        if (attemptCount >= 3) {
-                            lockUntil = new Date(Date.now() + 10 * 60000);
-                            alert("⚠️ Exceeded limit. Try again after 10 minutes.");
-                        } else {
-                            alert("❌ Invalid credentials. Attempts left: " + (3 - attemptCount));
-                        }
-                    }
-                },
-                error: function () {
-                    $("#loginMessage").text("⚠️ Server error. Try again later.");
-                }
-            });
         });
+    });
+
 
         // ✅ Forgot Password
         $("#forgotPasswordLink").click(function (e) {

@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Keep your main layout
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container mt-4 mb-5">
+    <h2 class="text-center text-warning fw-bold mb-4">👑 GlowCart Admin Portal</h2>
+
+    <!-- 🔹 Top Tabs Navigation -->
+    <ul class="nav nav-tabs justify-content-center mb-4" id="adminTabs">
+        <li class="nav-item">
+            <a class="nav-link active fw-bold" href="#" data-page="/Admin/_Overview">📊 Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold" href="#" data-page="/Admin/_Products">🛍️ Product Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold" href="#" data-page="/Admin/_Orders">🧾 Orders</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold" href="#" data-page="/Admin/_Users">👥 Active Users</a>
+        </li>
+    </ul>
+
+    <!-- 🔹 Dynamic Content Area -->
+    <div id="adminContent" class="p-4 bg-light rounded shadow-sm border">
+        <p class="text-muted text-center">Please select a tab to load content...</p>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Handle tab clicks
+        $("#adminTabs .nav-link").click(function (e) {
+            e.preventDefault();
+
+            // Change active state
+            $("#adminTabs .nav-link").removeClass("active");
+            $(this).addClass("active");
+
+            // Load partial view dynamically
+            const pageUrl = $(this).data("page");
+            $("#adminContent").html("<p class='text-center text-muted'>⏳ Loading...</p>");
+            $("#adminContent").load(pageUrl, function (response, status) {
+                if (status === "error") {
+                    $("#adminContent").html("<p class='text-danger text-center'>❌ Error loading content.</p>");
+                }
+            });
+        });
+
+        // Auto-load Overview tab on page load
+        $("#adminTabs .nav-link.active").trigger("click");
+    });
+</script>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #333;
+        transition: 0.3s;
+    }
+
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom: 3px solid #ffc107;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+            background-color: transparent;
+        }
+
+    #adminContent {
+        min-height: 400px;
+        background-color: #fff;
+    }
+</style>
