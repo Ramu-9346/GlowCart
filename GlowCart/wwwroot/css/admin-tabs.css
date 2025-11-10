@@ -1,0 +1,272 @@
+﻿/* ====== GLOBAL ====== */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f7fa;
+}
+
+/* ====== FIXED NAVBAR ====== */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    z-index: 1050;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ====== FIXED TABS BAR ====== */
+.admin-header {
+    position: fixed;
+    top: 65px;
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #d0d0d0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    padding: 0 40px;
+}
+
+.admin-tabs {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tab-item {
+    padding: 14px 26px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s ease;
+}
+
+    .tab-item:hover {
+        color: #0078ff;
+        background: #f4f6f8;
+    }
+
+    .tab-item.active {
+        color: #0078ff;
+        border-bottom: 3px solid #0078ff;
+    }
+
+/* ====== FOOTER ====== */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid #ddd;
+    text-align: center;
+    padding: 3px 0;
+    font-size: 11px;
+    color: #666;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+/* ====== MAIN CONTENT ====== */
+.admin-content {
+    position: absolute;
+    top: 120px; /* Navbar + Tabs */
+    bottom: 35px; /* Footer offset */
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 6px;
+    margin: 0 35px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    padding: 20px 30px;
+}
+
+/* ====== TABLE CONTAINER ====== */
+.table-container {
+    width: 100%;
+    height: calc(100vh - 310px);
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ====== TABLE (ERP Style) ====== */
+.data-grid {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 14px;
+    color: #2d2d2d;
+}
+
+    .data-grid thead th {
+        background: #0078d7;
+        color: #fff;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+
+    .data-grid td {
+        padding: 6px 12px;
+        border-bottom: 1px solid #e2e6ea;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    .data-grid tbody tr:hover {
+        background-color: #f3f7fb;
+    }
+
+    .data-grid tbody tr:nth-child(even) {
+        background: #f7f9fc;
+    }
+
+/* ====== STATUS DOT ====== */
+.status-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+    .status-dot .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .status-dot.instock .dot {
+        background: #28a745;
+    }
+
+    .status-dot.outstock .dot {
+        background: #dc3545;
+    }
+
+/* ====== ACTION ICONS ====== */
+.action-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 3px 5px;
+    transition: transform 0.15s ease;
+    margin: 0 2px;
+}
+
+    .action-btn i {
+        font-size: 15px;
+        opacity: 0.9;
+    }
+
+    .action-btn.edit {
+        color: #0078d7;
+    }
+
+    .action-btn.delete {
+        color: #dc3545;
+    }
+
+    .action-btn:hover i {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+/* ====== FILTER BAR ====== */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+    .filter-bar input {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        width: 200px;
+    }
+
+        .filter-bar input:focus {
+            border-color: #0078d7;
+            box-shadow: 0 0 2px rgba(0, 120, 255, 0.3);
+        }
+
+.btn-filter {
+    background: #f3f4f6;
+    border: 1px solid #d0d0d0;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #333;
+}
+
+    .btn-filter.active, .btn-filter:hover {
+        background: #0078d7;
+        color: #fff;
+        border-color: #0078d7;
+    }
+
+.btn-refresh {
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #0078d7;
+    font-size: 13px;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+    .btn-refresh:hover {
+        background: #0078d7;
+        color: #fff;
+    }
+
+.btn-add {
+    background: #339cff;
+    border: none;
+    color: #fff;
+    padding: 5px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+    .btn-add:hover {
+        background: #0078d7;
+    }
+
+/* ====== SCROLLBAR ====== */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #9b9b9b;
+    }
