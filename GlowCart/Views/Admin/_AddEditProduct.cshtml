@@ -1,0 +1,148 @@
+﻿@model GlowCart.Entities.Models.Product
+
+<div class="modal-header bg-primary text-white p-2">
+    <h6 class="modal-title mb-0">
+        @(Model.ProductId == 0 ? "➕ Add New Product" : "✏️ Edit Product")
+    </h6>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body p-3">
+    <form id="productForm" enctype="multipart/form-data" autocomplete="off">
+
+        <input type="hidden" name="ProductId" value="@Model.ProductId" />
+
+        <div class="mb-2">
+            <label class="form-label fw-semibold">Product Name</label>
+            <input type="text" name="ProductName" value="@Model.ProductName" class="form-control form-control-sm flat-input" required />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label fw-semibold">Brand</label>
+            <input type="text" name="Brand" value="@Model.Brand" class="form-control form-control-sm flat-input" required />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label fw-semibold">Price (₹)</label>
+            <input type="number" name="Price" value="@Model.Price" step="0.01" class="form-control form-control-sm flat-input" required />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label fw-semibold">Status</label>
+            <select name="IsAvailable" class="form-select form-select-sm flat-input" required>
+                @if (Model.IsAvailable)
+                {
+                    <option value="true" selected>In Stock</option>
+                    <option value="false">Out of Stock</option>
+                }
+                else
+                {
+                    <option value="true">In Stock</option>
+                    <option value="false" selected>Out of Stock</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label fw-semibold">Product Image</label>
+            <input type="file" name="ProductImage" class="form-control form-control-sm flat-input" accept="image/*" />
+            <div class="text-center mt-2">
+                <img id="imagePreview"
+                     src="~/images/@(string.IsNullOrEmpty(Model.ImageUrl) ? "noimage.png" : Model.ImageUrl)"
+                     alt="Product Image"
+                     style="width:100px;height:100px;object-fit:cover;border:1px solid #ccc;" />
+
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<div class="modal-footer p-2 d-flex justify-content-end">
+    <button type="button" class="btn btn-secondary btn-sm flat-btn" data-bs-dismiss="modal">Cancel</button>
+    <button id="btnSaveProduct" class="btn btn-primary btn-sm flat-btn disabled" disabled>
+        💾 Save Product
+    </button>
+</div>
+
+@section Scripts {
+    <script>
+        // ✅ Live Image Preview
+        $(document).on("change", "input[name='ProductImage']", function () {
+            const file = this.files[0];
+            const preview = $("#imagePreview");
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => preview.attr("src", e.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ✅ Enable Save only when all required fields filled
+        function checkFormValidity() {
+            const allFilled = $("#productForm")[0].checkValidity();
+            const saveBtn = $("#btnSaveProduct");
+            if (allFilled) {
+                saveBtn.removeClass("disabled").prop("disabled", false);
+            } else {
+                saveBtn.addClass("disabled").prop("disabled", true);
+            }
+        }
+
+        $(document).on("input change", "#productForm input, #productForm select", checkFormValidity);
+
+        // ✅ Save Product
+        $(document).off("click", "#btnSaveProduct").on("click", "#btnSaveProduct", function (e) {
+            e.preventDefault();
+            var formData = new FormData($("#productForm")[0]);
+
+            $.ajax({
+                url: '/Admin/SaveProductWithImage',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert(response.message);
+                    if (response.success) {
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+                        modal.hide();
+                        $("#adminContent").load("/Admin/_Products");
+                    }
+                },
+                error: function () {
+                    alert("Error saving product.");
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    /* 🧩 Compact Sharp Input Fields */
+    .flat-input {
+        border-radius: 0 !important;
+        height: 32px !important;
+        font-size: 13px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* 🧩 Compact Sharp Buttons */
+    .flat-btn {
+        border-radius: 0 !important;
+        padding: 4px 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* Disabled look for inactive Save */
+    .btn.disabled, .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Image preview box */
+    #imagePreview {
+        border-radius: 0 !important;
+        background-color: #f8f9fa;
+    }
+</style>

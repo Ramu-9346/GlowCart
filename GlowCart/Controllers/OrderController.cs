@@ -18,7 +18,7 @@ namespace GlowCart.Controllers
         }
 
         // ==============================
-        // 🔹 GET: Checkout Page
+        //  GET: Checkout Page
         // ==============================
         [HttpGet]
         public IActionResult Checkout()
@@ -45,7 +45,7 @@ namespace GlowCart.Controllers
         }
 
         // ==============================
-        // 🔹 POST: Place Order (AJAX)
+        //  POST: Place Order (AJAX)
         // ==============================
         [HttpPost]
         public JsonResult PlaceOrder(string shippingAddress)

@@ -4,8 +4,8 @@
     <h4 class="fw-bold text-primary mb-2">🛍️ Product Management</h4>
 
     <!-- 🔍 Filter Bar -->
-    <div class="filter-bar mb-2">
-        <input type="text" id="txtSearch" placeholder="🔍 Search products..." />
+    <div class="filter-bar mb-2 d-flex flex-wrap align-items-center gap-2">
+        <input type="text" id="txtSearch" placeholder="🔍 Search products..." class="form-control" style="width: 200px;" />
 
         <div class="filter-buttons">
             <button class="btn-filter active" data-filter="all">All</button>
@@ -13,11 +13,11 @@
             <button class="btn-filter" data-filter="outstock">Out of Stock</button>
         </div>
 
-        <button id="btnRefresh" class="btn-refresh" title="Refresh Grid">
+        <button id="btnRefresh" class="btn-refresh">
             <i class="bi bi-arrow-clockwise"></i> Refresh
         </button>
 
-        <button id="btnAddProduct" class="btn-add">
+        <button id="btnAddProduct" class="btn-add ms-auto">
             <i class="bi bi-plus-lg"></i> Add New Product
         </button>
     </div>
@@ -50,10 +50,10 @@
                             </span>
                         </td>
                         <td style="text-align:center;">
-                            <button class="action-btn edit" title="Edit">
+                            <button class="action-btn edit" data-id="@item.ProductId" title="Edit">
                                 <i class="bi bi-pencil-fill"></i>
                             </button>
-                            <button class="action-btn delete" title="Delete">
+                            <button class="action-btn delete" data-id="@item.ProductId" title="Delete">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
                         </td>
@@ -64,11 +64,18 @@
     </div>
 </div>
 
-<!-- ✅ Scripts -->
+<!-- ✅ Bootstrap Modal (keep outside container) -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+</div>
+
+<!-- ✅ jQuery Scripts -->
 <script>
     $(document).ready(function () {
 
-        // 🔍 Search Filter
+        // 🔍 Search
         $("#txtSearch").on("keyup", function () {
             var value = $(this).val().toLowerCase();
             $("#productTableBody tr").filter(function () {
@@ -76,12 +83,11 @@
             });
         });
 
-        // 🟢 Filter by stock status
+        // 🟢 Stock Filter
         $(".btn-filter").click(function () {
             $(".btn-filter").removeClass("active");
             $(this).addClass("active");
             var filter = $(this).data("filter");
-
             $("#productTableBody tr").show();
             if (filter === "instock") $("#productTableBody tr.outstock").hide();
             else if (filter === "outstock") $("#productTableBody tr:not(.outstock)").hide();
@@ -93,9 +99,34 @@
             $(".btn-filter[data-filter='all']").click();
         });
 
-        // ➕ Add Product Button
+        // ➕ Add Product
         $("#btnAddProduct").click(function () {
-            alert("Add Product modal coming soon!");
+            $.get("/Admin/_AddEditProduct", function (html) {
+                   $("#modalContent").html(html);
+                     var modal = new bootstrap.Modal(document.getElementById('productModal'));
+                     modal.show();
+
+            });
+        });
+
+        // ✏️ Edit Product
+        $(document).on("click", ".action-btn.edit", function () {
+            const id = $(this).data("id");
+            $.get(`/Admin/_AddEditProduct?id=${id}`, function (html) {
+                $("#modalContent").html(html);
+                $("#productModal").modal("show");
+            });
+        });
+
+        // 🗑️ Delete Product
+        $(document).on("click", ".action-btn.delete", function () {
+            const id = $(this).data("id");
+            if (confirm("Are you sure you want to delete this product?")) {
+                $.post("/Admin/DeleteProduct", { id: id }, function (response) {
+                    alert(response.message);
+                    if (response.success) $("#adminContent").load("/Admin/_Products");
+                });
+            }
         });
     });
 </script>
