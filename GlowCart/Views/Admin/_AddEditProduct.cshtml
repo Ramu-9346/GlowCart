@@ -1,136 +1,67 @@
-﻿@model GlowCart.Entities.Models.Product
+﻿<form id="productForm" enctype="multipart/form-data">
 
-<!-- ✅ ADD/EDIT PRODUCT MODAL -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content sharp-modal">
-            <div class="modal-header modal-header-erp">
-                <h5 class="modal-title fw-bold" id="productModalTitle">➕ Add New Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+    <input type="hidden" id="ProductID" name="ProductID" />
 
-            <form id="productForm" enctype="multipart/form-data" class="p-3">
-                <input type="hidden" id="ProductId" name="ProductId" value="@Model?.ProductId" />
+    <label class="form-label">Product Name</label>
+    <input type="text" id="ProductName" name="ProductName" class="form-input" required />
 
-                <div class="row mb-2">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Product Name</label>
-                        <input type="text" id="ProductName" name="ProductName" class="form-control form-control-sm" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Brand</label>
-                        <input type="text" id="Brand" name="Brand" class="form-control form-control-sm" />
-                    </div>
-                </div>
+    <label class="form-label">Brand</label>
+    <input type="text" id="Brand" name="Brand" class="form-input" required />
 
-                <div class="row mb-2">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Price (₹)</label>
-                        <input type="number" id="Price" name="Price" class="form-control form-control-sm" step="0.01" min="0" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Status</label>
-                        <select id="IsAvailable" name="IsAvailable" class="form-select form-select-sm">
-                            <option value="true">In Stock</option>
-                            <option value="false">Out of Stock</option>
-                        </select>
-                    </div>
-                </div>
+    <label class="form-label">Price (₹)</label>
+    <input type="number" id="Price" name="Price" class="form-input" required />
 
-                <div class="mb-2">
-                    <label class="form-label fw-bold">Product Image</label>
-                    <input type="file" id="ProductImage" name="ProductImage" class="form-control form-control-sm" accept="image/*" />
-                    <div class="text-center mt-2">
-                        <img id="previewImage"
-                             src="~/images/noimage.png"
-                             alt="Product Image"
-                             class="preview-img" />
-                    </div>
-                </div>
+    <label class="form-label">Status</label>
+    <select id="IsAvailable" name="IsAvailable" class="form-input" required>
+        <option value="true">In Stock</option>
+        <option value="false">Out of Stock</option>
+    </select>
 
-                <div class="text-end mt-3">
-                    <button type="button" id="btnCancelProduct" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="btnSaveProduct" class="btn btn-primary btn-sm disabled" disabled>💾 Save Product</button>
-                </div>
-            </form>
-        </div>
+    <label class="form-label">Product Image</label>
+    <input type="file" id="ProductImage" name="ProductImage" class="form-input"
+           accept="image/*" onchange="previewImage(this)" />
+
+    <img id="imagePreview" class="preview-box" src="/images/noimage.png" />
+
+    <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancel</button>
+        <button type="button" id="btnSaveProduct" class="btn-save">Save Product</button>
     </div>
-</div>
 
-<!-- ✅ JQUERY LOGIC -->
+</form>
+
+
 <script>
-    $(document).ready(function () {
-        const modalEl = document.getElementById('productModal');
-        const productModal = new bootstrap.Modal(modalEl);
-
-        // ✅ Function to open modal (Add/Edit)
-        window.openProductModal = function (mode, data = null) {
-            $("#productForm")[0].reset();
-            $("#previewImage").attr("src", "/images/noimage.png");
-            $("#ProductId").val(0);
-            $("#btnSaveProduct").addClass("disabled").prop("disabled", true);
-
-            if (mode === "edit" && data) {
-                $("#ProductModalTitle").text("✏️ Edit Product");
-                $("#ProductId").val(data.ProductId);
-                $("#ProductName").val(data.ProductName);
-                $("#Brand").val(data.Brand);
-                $("#Price").val(data.Price);
-                $("#IsAvailable").val(data.IsAvailable ? "true" : "false");
-                if (data.ImageUrl) {
-                    $("#previewImage").attr("src", "/images/" + data.ImageUrl);
-                }
-            } else {
-                $("#ProductModalTitle").text("➕ Add New Product");
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                $("#imagePreview").attr("src", e.target.result);
             }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 
-            productModal.show();
-        };
+    // SAVE PRODUCT
+    $(document).on("click", "#btnSaveProduct", function () {
+        let formData = new FormData($("#productForm")[0]);
 
-        // ✅ Enable Save only if form valid
-        $("#productForm input, #productForm select").on("input change", function () {
-            const filled = $("#ProductName").val().trim() !== "" &&
-                           $("#Brand").val().trim() !== "" &&
-                           parseFloat($("#Price").val()) > 0;
-            $("#btnSaveProduct").toggleClass("disabled", !filled).prop("disabled", !filled);
-        });
+        $.ajax({
+           url: '/Admin/SaveProductWithImage',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                alert(res.message);
+                if (res.success) {
 
-        // ✅ Preview selected image
-        $("#ProductImage").on("change", function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    $("#previewImage").attr("src", e.target.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                $("#previewImage").attr("src", "/images/noimage.png");
-            }
-        });
+                     reloadProductsGrid(); // Product grid is load instead of whole page 
 
-        // ✅ Save Product (AJAX)
-        $("#btnSaveProduct").on("click", function (e) {
-            e.preventDefault();
-            const fd = new FormData($("#productForm")[0]);
-
-            $.ajax({
-                url: '/Admin/SaveProductWithImage',
-                type: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                success: function (res) {
-                    alert(res.message);
-                    if (res.success) {
-                        productModal.hide();
-                        location.reload();
-                    }
-                },
-                error: function () {
-                    alert("⚠️ Error saving product!");
+                    //  close modal
+                    closeProductModal();
                 }
-            });
+            }
         });
     });
 </script>

@@ -77,12 +77,20 @@ namespace GlowCart.Controllers
         [HttpPost]
      public JsonResult DeleteProduct(int id)
      {
-        var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
-        bool success = productService.DeleteProduct(id);
-        string message = success ? "Product deleted successfully!" : "Failed to delete product.";
-        return Json(new { success, message });
-     }
-     [HttpGet]
+            try
+            {
+                var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
+                bool success = productService.DeleteProduct(id);
+                string message = success ? "Product deleted successfully!" : "Failed to delete product.";
+                return Json(new { success, message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message ="Cannot delete this item becuase it is in Order " });
+            }
+
+        }
+        [HttpGet]
      public IActionResult _AddEditProduct(int? id)
      {
          var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
@@ -94,7 +102,7 @@ namespace GlowCart.Controllers
         //{
         //    string imageFileName = product.ImageUrl ?? "noimage.png";
 
-        //    try
+        //    try   
         //    {
         //        if (ProductImage != null && ProductImage.Length > 0)
         //        {

@@ -1,17 +1,26 @@
 ﻿@model IEnumerable<GlowCart.Entities.Models.Product>
+
 <link rel="stylesheet" href="~/css/admin-products.css" />
 
-<div class="container mt-4 admin-products">
-    <h4 class="fw-bold text-primary mb-3">🛍️ Product Management</h4>
+<div id="productSection" class="admin-products-container">
+
+    <h4 class="page-title">🛍️ Product Management</h4>
 
     <!-- 🔍 Filter Bar -->
-    <div class="filter-bar mb-2">
-        <input type="text" id="txtSearch" placeholder="🔍 Search products..." />
+    <div class="filter-bar">
+        <input type="text" id="txtSearch" placeholder="Search products..." class="search-box" />
+
         <button class="btn-filter active" data-filter="all">All</button>
         <button class="btn-filter" data-filter="instock">In Stock</button>
         <button class="btn-filter" data-filter="outstock">Out of Stock</button>
-        <button id="btnRefresh" class="btn-refresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-        <button id="btnAddProduct" class="btn-add"><i class="bi bi-plus-lg"></i> Add New Product</button>
+
+        <button id="btnRefresh" class="btn-refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+
+        <button id="btnAddProduct" class="btn-add">
+            <i class="bi bi-plus-lg"></i> Add New Product
+        </button>
     </div>
 
     <!-- 🧾 Product Table -->
@@ -27,23 +36,26 @@
                     <th style="text-align:center;">Actions</th>
                 </tr>
             </thead>
+
             <tbody id="productTableBody">
                 @foreach (var item in Model)
                 {
-                    <tr data-id="@item.ProductId" class="@(item.IsAvailable ? "" : "outstock")">
+                    <tr class="@(item.IsAvailable ? "" : "outstock")" data-id="@item.ProductId">
                         <td>@item.ProductId</td>
                         <td>@item.ProductName</td>
                         <td>@item.Brand</td>
                         <td>@item.Price</td>
+
                         <td>
                             <span class="status-dot @(item.IsAvailable ? "instock" : "outstock")">
                                 <span class="dot"></span>
                                 @(item.IsAvailable ? "In Stock" : "Out of Stock")
                             </span>
                         </td>
-                        <td style="text-align:center;">
-                            <button class="action-btn edit" title="Edit"><i class="bi bi-pencil-fill"></i></button>
-                            <button class="action-btn delete" title="Delete"><i class="bi bi-trash-fill"></i></button>
+
+                        <td class="act-col">
+                            <button class="action-btn edit"><i class="bi bi-pencil-fill"></i></button>
+                            <button class="action-btn delete"><i class="bi bi-trash-fill"></i></button>
                         </td>
                     </tr>
                 }
@@ -52,58 +64,128 @@
     </div>
 </div>
 
-<!-- ✅ SCRIPTS -->
+<!-- 🔵 CUSTOM MODAL -->
+<div id="productModal" class="custom-modal">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <span id="modalTitle"></span>
+            <button class="close-btn" onclick="closeProductModal()">✖</button>
+        </div>
+
+        <div class="modal-body" id="modalContent">
+            @Html.Partial("_AddEditProduct")
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ========================================================== -->
+<!--     FULL SCRIPT – INCLUDING GRID RELOAD LOGIC             -->
+<!-- ========================================================== -->
 <script>
+
+    // ==========================================================
+    // 🔄 RELOAD PRODUCT GRID ONLY (NO PAGE REFRESH)
+    // ==========================================================
+    function reloadProductsGrid() {
+        $("#productSection").load("/Admin/_Products", function () {
+            console.log("🔄 Grid refreshed without reloading whole page.");
+        });
+    }
+
+
     $(document).ready(function () {
 
-        // 🔍 Search Filter
+        // 🔍 Search
         $("#txtSearch").on("keyup", function () {
-            var value = $(this).val().toLowerCase();
+            let val = $(this).val().toLowerCase();
             $("#productTableBody tr").filter(function () {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                $(this).toggle($(this).text().toLowerCase().includes(val));
             });
         });
 
-        // 🟢 Filter by stock
+        // 🟢 Filter buttons
         $(".btn-filter").click(function () {
             $(".btn-filter").removeClass("active");
             $(this).addClass("active");
-            var filter = $(this).data("filter");
 
+            let filter = $(this).data("filter");
             $("#productTableBody tr").show();
-            if (filter === "instock") $("#productTableBody tr.outstock").hide();
-            else if (filter === "outstock") $("#productTableBody tr:not(.outstock)").hide();
+
+            if (filter === "instock") $(".outstock").hide();
+            if (filter === "outstock") $("#productTableBody tr:not(.outstock)").hide();
         });
 
         // 🔁 Refresh
         $("#btnRefresh").click(function () {
-            $("#txtSearch").val('');
+            $("#txtSearch").val("");
             $(".btn-filter[data-filter='all']").click();
         });
 
-        // ➕ Add Product
+        // ➕ ADD PRODUCT
         $("#btnAddProduct").click(function () {
             openProductModal("add");
         });
 
-        // ✏️ Edit Product
+        // ✏ EDIT PRODUCT
         $(document).on("click", ".action-btn.edit", function () {
-            var id = $(this).closest("tr").data("id");
-            $.get("/Admin/GetProduct", { id: id }, function (res) {
-                if (res.success && res.product) openProductModal("edit", res.product);
-                else alert("Failed to load product!");
+            let id = $(this).closest("tr").data("id");
+
+            $.get("/Admin/GetProduct", { id }, function (res) {
+                if (res.success) {
+                    openProductModal("edit", res.product);
+                } else {
+                    alert("Unable to load product.");
+                }
             });
         });
 
-        // 🗑️ Delete Product
+        // 🗑 DELETE PRODUCT
         $(document).on("click", ".action-btn.delete", function () {
-            var id = $(this).closest("tr").data("id");
-            if (confirm("Are you sure you want to delete this product?")) {
-                $.post("/Admin/DeleteProduct", { id: id }, function (res) {
-                    alert(res.message);
-                    if (res.success) location.reload();
-                });
-            }
+            let id = $(this).closest("tr").data("id");
+
+            if (!confirm("Delete this product?")) return;
+
+            $.post("/Admin/DeleteProduct", { id }, function (res) {
+                alert(res.message);
+                if (res.success) reloadProductsGrid();
+            });
         });
     });
+
+
+    // OPEN MODAL
+    function openProductModal(mode, product = null) {
+
+        $("#productForm")[0].reset();
+        $("#ProductId").val("");
+
+        $("#imagePreview").attr("src", "/images/noimage.png");
+
+        if (mode === "add") {
+            $("#modalTitle").text("➕ Add New Product");
+        }
+        else {
+            $("#modalTitle").text("✏ Edit Product");
+
+            $("#ProductId").val(product.productId);
+            $("#ProductName").val(product.productName);
+            $("#Brand").val(product.brand);
+            $("#Price").val(product.price);
+            $("#IsAvailable").val(product.isAvailable ? "true" : "false");
+
+            let imgSrc = product.imageUrl ? "/images/" + product.imageUrl : "/images/noimage.png";
+            $("#imagePreview").attr("src", imgSrc);
+        }
+
+        $("#productModal").show();
+    }
+
+    // CLOSE MODAL
+    function closeProductModal() {
+        $("#productModal").hide();
+    }
+
 </script>

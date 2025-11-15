@@ -1,36 +1,54 @@
-﻿/* 🔷 GENERAL STYLING */
-.admin-products {
-    background: #fff;
-    padding: 20px;
-    border-radius: 6px;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+﻿/* ============================================
+   SHARP ERP-STYLE PRODUCT MANAGEMENT UI
+   No round corners, compact, clean
+=============================================== */
+
+
+/* ---------- Container ---------- */
+.admin-products-container {
+    padding: 10px 20px;
 }
 
-/* 🔹 FILTER BAR */
+/* ---------- Page Title ---------- */
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #0051a3;
+}
+
+
+/* ============================================
+   FILTER BAR
+=============================================== */
 .filter-bar {
     display: flex;
-    align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    align-items: center;
 }
 
-    .filter-bar input {
-        padding: 5px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 13px;
-        width: 200px;
+.search-box {
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    font-size: 13px;
+    width: 200px;
+    outline: none;
+}
+
+    .search-box:focus {
+        border-color: #0078d7;
     }
 
-.btn-filter, .btn-refresh, .btn-add {
-    padding: 5px 10px;
-    font-size: 13px;
-    border-radius: 3px;
-    border: 1px solid #ccc;
+
+/* ---------- Filter Buttons ---------- */
+.btn-filter {
+    border: 1px solid #bcbcbc;
     background: #f3f3f3;
+    padding: 4px 10px;
+    font-size: 12px;
     cursor: pointer;
-    transition: 0.2s;
+    color: #333;
 }
 
     .btn-filter.active,
@@ -40,85 +58,239 @@
         border-color: #0078d7;
     }
 
+/* ---------- Refresh Button ---------- */
+.btn-refresh {
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #0078d7;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+    .btn-refresh:hover {
+        background: #0078d7;
+        color: #fff;
+    }
+
+/* ---------- Add Button ---------- */
 .btn-add {
-    background: #339cff;
-    color: #fff;
-    border: none;
     margin-left: auto;
+    background: #007bff;
+    border: 1px solid #005ec4;
+    color: white;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
 }
 
     .btn-add:hover {
-        background: #0078d7;
+        background: #005ec4;
     }
 
-/* 🔹 TABLE */
+
+/* ============================================
+   TABLE STYLING (ERP STRICT LOOK)
+=============================================== */
+
 .table-container {
-    width: 100%;
+    border: 1px solid #d0d0d0;
+    max-height: calc(100vh - 280px);
     overflow-y: auto;
-    border: 1px solid #dee2e6;
 }
 
 .data-grid {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13px;
 }
 
     .data-grid th {
-        background: #0078d7;
-        color: #fff;
+        background: #0067c5;
+        color: white;
         padding: 8px;
+        font-weight: 600;
+        border-bottom: 1px solid #004a91;
     }
 
     .data-grid td {
         padding: 6px 8px;
-        border-bottom: 1px solid #e2e6ea;
+        border-bottom: 1px solid #e5e5e5;
     }
 
-.status-dot .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
+    .data-grid tr:hover {
+        background: #eef4fa;
+    }
+
+    /* Out-of-stock row faded */
+    .data-grid tr.outstock {
+        background: #f6f6f6;
+        color: #999;
+    }
+
+/* Status dot */
+.status-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.status-dot.instock .dot {
-    background: #28a745;
+    .status-dot .dot {
+        width: 9px;
+        height: 9px;
+        background: #bbb;
+        display: inline-block;
+    }
+
+    .status-dot.instock .dot {
+        background: #1fa545;
+    }
+
+    .status-dot.outstock .dot {
+        background: #d62828;
+    }
+
+/* Action column */
+.act-col {
+    text-align: center;
 }
 
-.status-dot.outstock .dot {
-    background: #dc3545;
-}
 
+/* ---------- Action Buttons ---------- */
 .action-btn {
-    background: none;
     border: none;
+    background: transparent;
     cursor: pointer;
-    padding: 4px;
+    padding: 3px;
 }
+
+    .action-btn i {
+        font-size: 14px;
+    }
 
     .action-btn.edit {
         color: #0078d7;
     }
 
+        .action-btn.edit:hover {
+            color: #005aa3;
+        }
+
     .action-btn.delete {
-        color: #dc3545;
+        color: #d62828;
     }
 
-/* 🔹 MODAL */
-.sharp-modal {
-    border-radius: 0 !important;
+        .action-btn.delete:hover {
+            color: #a11717;
+        }
+
+
+/* ============================================
+   CUSTOM MODAL (SHARP ERP STYLE)
+=============================================== */
+
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    z-index: 2000;
 }
 
-.modal-header-erp {
-    background: #0078d7;
+.modal-box {
+    background: white;
+    width: 55%;
+    margin: 60px auto;
+    padding: 0;
+    border: 1px solid #888;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+/* Header */
+.modal-header {
+    background: #007bff;
     color: white;
-    border-radius: 0;
+    padding: 10px;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
 }
 
-.preview-img {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #ddd;
-    object-fit: cover;
+.close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
 }
+
+/* Body */
+.modal-body {
+    padding: 20px;
+}
+
+/* Labels */
+.form-label {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+/* Inputs */
+.form-input {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 5px 8px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+    .form-input:focus {
+        border-color: #0078d7;
+    }
+
+/* Image preview */
+.preview-box {
+    width: 120px;
+    height: 120px;
+    border: 1px solid #ccc;
+    display: block;
+    object-fit: contain;
+    margin-top: 5px;
+}
+
+/* Footer buttons */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+}
+
+.btn-cancel {
+    border: 1px solid #666;
+    background: #eee;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-save {
+    border: 1px solid #005bb5;
+    background: #007bff;
+    color: white;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+    .btn-save:disabled {
+        background: #9fc6ff;
+        border-color: #a7a7a7;
+        cursor: not-allowed;
+    }
