@@ -1,148 +1,136 @@
 ﻿@model GlowCart.Entities.Models.Product
 
-<div class="modal-header bg-primary text-white p-2">
-    <h6 class="modal-title mb-0">
-        @(Model.ProductId == 0 ? "➕ Add New Product" : "✏️ Edit Product")
-    </h6>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-</div>
-
-<div class="modal-body p-3">
-    <form id="productForm" enctype="multipart/form-data" autocomplete="off">
-
-        <input type="hidden" name="ProductId" value="@Model.ProductId" />
-
-        <div class="mb-2">
-            <label class="form-label fw-semibold">Product Name</label>
-            <input type="text" name="ProductName" value="@Model.ProductName" class="form-control form-control-sm flat-input" required />
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label fw-semibold">Brand</label>
-            <input type="text" name="Brand" value="@Model.Brand" class="form-control form-control-sm flat-input" required />
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label fw-semibold">Price (₹)</label>
-            <input type="number" name="Price" value="@Model.Price" step="0.01" class="form-control form-control-sm flat-input" required />
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label fw-semibold">Status</label>
-            <select name="IsAvailable" class="form-select form-select-sm flat-input" required>
-                @if (Model.IsAvailable)
-                {
-                    <option value="true" selected>In Stock</option>
-                    <option value="false">Out of Stock</option>
-                }
-                else
-                {
-                    <option value="true">In Stock</option>
-                    <option value="false" selected>Out of Stock</option>
-                }
-            </select>
-        </div>
-
-        <div class="mb-2">
-            <label class="form-label fw-semibold">Product Image</label>
-            <input type="file" name="ProductImage" class="form-control form-control-sm flat-input" accept="image/*" />
-            <div class="text-center mt-2">
-                <img id="imagePreview"
-                     src="~/images/@(string.IsNullOrEmpty(Model.ImageUrl) ? "noimage.png" : Model.ImageUrl)"
-                     alt="Product Image"
-                     style="width:100px;height:100px;object-fit:cover;border:1px solid #ccc;" />
-
+<!-- ✅ ADD/EDIT PRODUCT MODAL -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content sharp-modal">
+            <div class="modal-header modal-header-erp">
+                <h5 class="modal-title fw-bold" id="productModalTitle">➕ Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
+            <form id="productForm" enctype="multipart/form-data" class="p-3">
+                <input type="hidden" id="ProductId" name="ProductId" value="@Model?.ProductId" />
+
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Product Name</label>
+                        <input type="text" id="ProductName" name="ProductName" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Brand</label>
+                        <input type="text" id="Brand" name="Brand" class="form-control form-control-sm" />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Price (₹)</label>
+                        <input type="number" id="Price" name="Price" class="form-control form-control-sm" step="0.01" min="0" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Status</label>
+                        <select id="IsAvailable" name="IsAvailable" class="form-select form-select-sm">
+                            <option value="true">In Stock</option>
+                            <option value="false">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label fw-bold">Product Image</label>
+                    <input type="file" id="ProductImage" name="ProductImage" class="form-control form-control-sm" accept="image/*" />
+                    <div class="text-center mt-2">
+                        <img id="previewImage"
+                             src="~/images/noimage.png"
+                             alt="Product Image"
+                             class="preview-img" />
+                    </div>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="button" id="btnCancelProduct" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="btnSaveProduct" class="btn btn-primary btn-sm disabled" disabled>💾 Save Product</button>
+                </div>
+            </form>
         </div>
-
-    </form>
+    </div>
 </div>
 
-<div class="modal-footer p-2 d-flex justify-content-end">
-    <button type="button" class="btn btn-secondary btn-sm flat-btn" data-bs-dismiss="modal">Cancel</button>
-    <button id="btnSaveProduct" class="btn btn-primary btn-sm flat-btn disabled" disabled>
-        💾 Save Product
-    </button>
-</div>
+<!-- ✅ JQUERY LOGIC -->
+<script>
+    $(document).ready(function () {
+        const modalEl = document.getElementById('productModal');
+        const productModal = new bootstrap.Modal(modalEl);
 
-@section Scripts {
-    <script>
-        // ✅ Live Image Preview
-        $(document).on("change", "input[name='ProductImage']", function () {
-            const file = this.files[0];
-            const preview = $("#imagePreview");
+        // ✅ Function to open modal (Add/Edit)
+        window.openProductModal = function (mode, data = null) {
+            $("#productForm")[0].reset();
+            $("#previewImage").attr("src", "/images/noimage.png");
+            $("#ProductId").val(0);
+            $("#btnSaveProduct").addClass("disabled").prop("disabled", true);
+
+            if (mode === "edit" && data) {
+                $("#ProductModalTitle").text("✏️ Edit Product");
+                $("#ProductId").val(data.ProductId);
+                $("#ProductName").val(data.ProductName);
+                $("#Brand").val(data.Brand);
+                $("#Price").val(data.Price);
+                $("#IsAvailable").val(data.IsAvailable ? "true" : "false");
+                if (data.ImageUrl) {
+                    $("#previewImage").attr("src", "/images/" + data.ImageUrl);
+                }
+            } else {
+                $("#ProductModalTitle").text("➕ Add New Product");
+            }
+
+            productModal.show();
+        };
+
+        // ✅ Enable Save only if form valid
+        $("#productForm input, #productForm select").on("input change", function () {
+            const filled = $("#ProductName").val().trim() !== "" &&
+                           $("#Brand").val().trim() !== "" &&
+                           parseFloat($("#Price").val()) > 0;
+            $("#btnSaveProduct").toggleClass("disabled", !filled).prop("disabled", !filled);
+        });
+
+        // ✅ Preview selected image
+        $("#ProductImage").on("change", function (e) {
+            const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = e => preview.attr("src", e.target.result);
+                reader.onload = function (e) {
+                    $("#previewImage").attr("src", e.target.result);
+                };
                 reader.readAsDataURL(file);
+            } else {
+                $("#previewImage").attr("src", "/images/noimage.png");
             }
         });
 
-        // ✅ Enable Save only when all required fields filled
-        function checkFormValidity() {
-            const allFilled = $("#productForm")[0].checkValidity();
-            const saveBtn = $("#btnSaveProduct");
-            if (allFilled) {
-                saveBtn.removeClass("disabled").prop("disabled", false);
-            } else {
-                saveBtn.addClass("disabled").prop("disabled", true);
-            }
-        }
-
-        $(document).on("input change", "#productForm input, #productForm select", checkFormValidity);
-
-        // ✅ Save Product
-        $(document).off("click", "#btnSaveProduct").on("click", "#btnSaveProduct", function (e) {
+        // ✅ Save Product (AJAX)
+        $("#btnSaveProduct").on("click", function (e) {
             e.preventDefault();
-            var formData = new FormData($("#productForm")[0]);
+            const fd = new FormData($("#productForm")[0]);
 
             $.ajax({
                 url: '/Admin/SaveProductWithImage',
                 type: 'POST',
-                data: formData,
+                data: fd,
                 processData: false,
                 contentType: false,
-                success: function (response) {
-                    alert(response.message);
-                    if (response.success) {
-                        var modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
-                        modal.hide();
-                        $("#adminContent").load("/Admin/_Products");
+                success: function (res) {
+                    alert(res.message);
+                    if (res.success) {
+                        productModal.hide();
+                        location.reload();
                     }
                 },
                 error: function () {
-                    alert("Error saving product.");
+                    alert("⚠️ Error saving product!");
                 }
             });
         });
-    </script>
-}
-
-<style>
-    /* 🧩 Compact Sharp Input Fields */
-    .flat-input {
-        border-radius: 0 !important;
-        height: 32px !important;
-        font-size: 13px !important;
-        padding: 4px 8px !important;
-    }
-
-    /* 🧩 Compact Sharp Buttons */
-    .flat-btn {
-        border-radius: 0 !important;
-        padding: 4px 12px !important;
-        font-size: 13px !important;
-    }
-
-    /* Disabled look for inactive Save */
-    .btn.disabled, .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    /* Image preview box */
-    #imagePreview {
-        border-radius: 0 !important;
-        background-color: #f8f9fa;
-    }
-</style>
+    });
+</script>

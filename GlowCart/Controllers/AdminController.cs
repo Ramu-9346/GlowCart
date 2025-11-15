@@ -1,6 +1,9 @@
 ﻿using GlowCart.BLL.Services;
 using GlowCart.Entities.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Data.Common;
+using System.Security.Cryptography.Xml;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GlowCart.Controllers
 {
@@ -86,57 +89,134 @@ namespace GlowCart.Controllers
          Product product = id.HasValue ? productService.GetProductDetails(id.Value) : new Product();
          return PartialView(product);
      }
-        [HttpPost]
-        public JsonResult SaveProductWithImage(Product product, IFormFile? ProductImage)
+        //[HttpPost]
+        //public JsonResult SaveProductWithImage(Product product, IFormFile? ProductImage)
+        //{
+        //    string imageFileName = product.ImageUrl ?? "noimage.png";
+
+        //    try
+        //    {
+        //        if (ProductImage != null && ProductImage.Length > 0)
+        //        {
+        //            // ✅ Ensure Images folder exists
+        //            string imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+        //            if (!Directory.Exists(imageFolder))
+        //                Directory.CreateDirectory(imageFolder);
+
+        //            // ✅ Unique file name
+        //            imageFileName = Guid.NewGuid().ToString() + Path.GetExtension(ProductImage.FileName);
+        //            string filePath = Path.Combine(imageFolder, imageFileName);
+
+        //            using (var stream = new FileStream(filePath, FileMode.Create))
+        //            {
+        //                ProductImage.CopyTo(stream);
+        //            }
+
+        //            product.ImageUrl = imageFileName;
+        //        }
+
+        //        var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
+
+        //        bool success;
+        //        string message;
+
+        //        if (product.ProductId == 0)
+        //        {
+        //            success = productService.AddProduct(product);
+        //            message = success ? "✅ Product added successfully!" : "❌ Failed to add product.";
+        //        }
+        //        else
+        //        {
+        //            success = productService.UpdateProduct(product);
+        //            message = success ? "✅ Product updated successfully!" : "❌ Failed to update product.";
+        //        }
+
+        //        return Json(new { success, message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = $"⚠️ Error: {ex.Message}" });
+        //    }
+        //}
+
+        [HttpGet]
+        public JsonResult GetProduct(int id)
         {
-            string imageFileName = product.ImageUrl ?? "noimage.png";
+            var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
+            var product = productService.GetProductDetails(id);
+            if (product == null) return Json(new { success = false });
+            return Json(new { success = true, product });
+        }
 
-            try
+        [HttpPost]
+        public async Task<JsonResult> SaveProductWithImage()
+        {
+            // This method reads form fields + file (multipart via AJAX FormData)
+            var form = Request.Form;
+            int.TryParse(form["ProductId"].FirstOrDefault() ?? "0", out int productId);
+
+            var product = new Product
             {
-                if (ProductImage != null && ProductImage.Length > 0)
+                ProductId = productId,
+                ProductName = form["ProductName"],
+                Brand = form["Brand"],
+                Description = form["Description"],
+                Price = decimal.TryParse(form["Price"], out var p) ? p : 0,
+                IsAvailable = (form["IsAvailable"].FirstOrDefault() ?? "false") == "true"
+            };
+
+            // handle uploaded file
+            var files = Request.Form.Files;
+            if (files != null && files.Count > 0)
+            {
+                var file = files[0];
+                if (file != null && file.Length > 0)
                 {
-                    // ✅ Ensure Images folder exists
-                    string imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                    if (!Directory.Exists(imageFolder))
-                        Directory.CreateDirectory(imageFolder);
+                    // generate a safe unique filename
+                    var fileName = Path.GetFileName(file.FileName);
+                    var unique = $"{Guid.NewGuid():N}_{fileName}";
+                    var env = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+                    var savePath = Path.Combine(env.WebRootPath, "images", unique);
 
-                    // ✅ Unique file name
-                    imageFileName = Guid.NewGuid().ToString() + Path.GetExtension(ProductImage.FileName);
-                    string filePath = Path.Combine(imageFolder, imageFileName);
+                    // ensure images folder exists
+                    var dir = Path.GetDirectoryName(savePath);
+                    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    using (var stream = new FileStream(savePath, FileMode.Create))
                     {
-                        ProductImage.CopyTo(stream);
+                        await file.CopyToAsync(stream);
                     }
 
-                    product.ImageUrl = imageFileName;
+                    // store the filename only in DB column ImageUrl
+                    product.ImageUrl = unique;
                 }
-
-                var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
-
-                bool success;
-                string message;
-
-                if (product.ProductId == 0)
+            }
+            else
+            {
+                // If no uploaded file and this is update, keep existing ImageUrl (fetch from DB)
+                if (productId > 0)
                 {
-                    success = productService.AddProduct(product);
-                    message = success ? "✅ Product added successfully!" : "❌ Failed to add product.";
+                    var svc = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
+                    var existing = svc.GetProductDetails(productId);
+                    if (existing != null) product.ImageUrl = existing.ImageUrl;
                 }
                 else
                 {
-                    success = productService.UpdateProduct(product);
-                    message = success ? "✅ Product updated successfully!" : "❌ Failed to update product.";
+                    product.ImageUrl = "noimage.png"; // fallback filename — put a noimage.png inside wwwroot/images
                 }
+            }
 
-                return Json(new { success, message });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"⚠️ Error: {ex.Message}" });
-            }
+            var productService = new ProductService(HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
+            bool success;
+            if (product.ProductId == 0)
+                success = productService.AddProduct(product);
+            else
+                success = productService.UpdateProduct(product);
+
+            var message = success ? "Saved successfully" : "Save failed";
+            return Json(new { success, message });
         }
-
-
+       
 
 
 
