@@ -1,33 +1,27 @@
 using System;
-using GlowCart.BLL.Factories;
-using GlowCart.BLL.Models;
+using GlowCart.Models;
 
 namespace GlowCart.BLL.Services
 {
     public class PaymentService
     {
-        private readonly IPaymentGatewayFactory paymentGatewayFactory;
-
-        public PaymentService(IPaymentGatewayFactory paymentGatewayFactory)
+        public void ProcessPayment()
         {
-            this.paymentGatewayFactory = paymentGatewayFactory ?? throw new ArgumentNullException(nameof(paymentGatewayFactory));
-        }
-
-        public void ProcessOrderPayment(Order order)
-        {
-            if (order == null) throw new ArgumentNullException(nameof(order));
-
-            var gateway = paymentGatewayFactory.CreateGateway();
-            if (gateway == null) throw new InvalidOperationException("Payment gateway could not be created.");
-
-            if (gateway.IsActive)
+            var paymentMethod = GetPaymentMethod();
+            if (paymentMethod != null && paymentMethod.IsActive)
             {
-                gateway.ProcessPayment(order);
+                // Process payment
             }
             else
             {
-                throw new InvalidOperationException("Payment gateway is not active.");
+                throw new InvalidOperationException("Payment method is not initialized or inactive.");
             }
+        }
+
+        private PaymentMethod GetPaymentMethod()
+        {
+            // Logic to retrieve the payment method
+            return new PaymentMethod { IsActive = true }; // Example implementation
         }
     }
 }
