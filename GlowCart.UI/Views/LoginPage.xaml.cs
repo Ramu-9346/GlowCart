@@ -14,7 +14,7 @@ namespace GlowCart.UI.Views
         private async void OnLoginButtonClicked(object sender, EventArgs e)
         {
             // Handle login logic here
-            await DisplayAlert("Login", "Login button clicked.", "OK");
+            await DisplayAlert("Login", "Login button clicked", "OK");
         }
     }
 }
